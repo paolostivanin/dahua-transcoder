@@ -1,0 +1,51 @@
+# ─── HTTP API ─────────────────────────────────────────────────────
+listen: ":8080"
+
+# Bearer token required on every /v1 call. At least 32 characters:
+#   openssl rand -hex 32
+token: "CHANGE-ME"
+
+# Restrict callers to these addresses or CIDRs (empty = allow all).
+# allowed_ips:
+#   - "192.168.1.10"     # the Home Assistant host
+#   - "127.0.0.1"
+
+# ─── NVR ──────────────────────────────────────────────────────────
+nvr:
+  url: "http://192.168.1.x"
+  # A playback-only NVR account is enough (Dahua: the "Search" right on
+  # the channels you need). Digest auth, SHA-256 or MD5.
+  username: "transcoder"
+  password: "CHANGE-ME"
+  # The NVR's own local time zone: loadfile.cgi takes wall-clock times
+  # without an offset.
+  timezone: "UTC"              # IANA name, e.g. "Europe/Berlin"
+  max_channel: 16
+
+# ─── Conversion ───────────────────────────────────────────────────
+work_dir: "/var/lib/dahua-transcoder"
+# ffmpeg: "ffmpeg"
+# ffprobe: "ffprobe"
+# input_format: "dhav"          # what loadfile.cgi returns
+
+# "vaapi" decodes and scales on the GPU and encodes with libx264 on the
+# CPU; "none" does everything on the CPU.
+hwaccel: "vaapi"
+vaapi_device: "/dev/dri/renderD128"
+max_long_edge: 1920             # fit inside this, keeping the aspect ratio
+crf: 32
+preset: "veryfast"
+x264_threads: 4
+
+# ─── Limits ───────────────────────────────────────────────────────
+# limits:
+#   max_queue: 4                    # active + queued jobs
+#   max_duration_seconds: 600
+#   settle_seconds: 10              # refuse windows that ended less than this ago
+#   raw_cap_mib: 512
+#   output_cap_mib: 128
+#   download_timeout_seconds: 90
+#   transcode_timeout_seconds: 240
+#   job_timeout_seconds: 360
+#   result_ttl_seconds: 600         # uncollected results are deleted after this
+#   duration_tolerance_seconds: 3   # output shorter than this = incomplete footage

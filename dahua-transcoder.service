@@ -1,0 +1,60 @@
+[Unit]
+Description=Dahua NVR review transcoder
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=dahua-transcoder
+Group=dahua-transcoder
+# VA-API needs the render node; the group is passed into the container
+# together with /dev/dri/renderD128.
+SupplementaryGroups=render
+
+ExecStart=/opt/dahua-transcoder/dahua-transcoder
+Environment="CONFIG_FILE=/etc/dahua-transcoder/config.yaml"
+
+# Work files live on disk under /var/lib, never in /tmp: Debian 13 keeps
+# /tmp in RAM, and one job writes ~270 MiB of raw footage.
+StateDirectory=dahua-transcoder
+StateDirectoryMode=0700
+
+# The conversion shares the host's cores with everything else on it.
+Nice=10
+IOSchedulingClass=best-effort
+IOSchedulingPriority=7
+
+# -------------------------------------------------------------------
+# Restart policy
+# -------------------------------------------------------------------
+Restart=always
+RestartSec=2
+
+# -------------------------------------------------------------------
+# Security Hardening
+# -------------------------------------------------------------------
+NoNewPrivileges=yes
+CapabilityBoundingSet=
+
+ReadOnlyPaths=/opt/dahua-transcoder
+
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
+ProtectProc=invisible
+
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectKernelLogs=true
+ProtectControlGroups=true
+
+SystemCallFilter=@system-service
+RestrictSUIDSGID=yes
+LockPersonality=true
+
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
